@@ -5038,16 +5038,37 @@
     box-shadow: 18px 0 48px rgba(0, 0, 0, 0.45);
   }
 
+  /* Не даём flex:1 сжимать пункты меню до нуля (иначе всё «наезжает» в колонке) */
   .platSidebar .platNav {
     flex-direction: column !important;
     flex-wrap: nowrap !important;
-    flex: 1;
+    flex: 0 0 auto !important;
     min-height: 0;
+    gap: 2px;
+    overflow: visible;
+    align-items: stretch;
+  }
+
+  .platSidebar .platNav > *,
+  .platSidebarFoot > * {
+    flex-shrink: 0 !important;
   }
 
   .platSidebarFoot {
     flex-direction: column !important;
     flex-wrap: nowrap !important;
+    align-items: stretch;
+    gap: 2px;
+    flex: 0 0 auto !important;
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .platSidebarFoot .platSidebarUser,
+  .platSidebarFoot .notifWrap--sidebar {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .platSidebarBrand {
