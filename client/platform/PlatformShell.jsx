@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlatformAside } from "./PlatformAside.jsx";
 import { PlatformScBackground } from "./PlatformScBackground.jsx";
 import { PlatformAboutModal } from "./PlatformAboutModal.jsx";
@@ -11,6 +11,8 @@ import {
   IconCrown,
   IconSettings,
   IconLogout,
+  IconMenu,
+  IconClose,
 } from "./PlatformIcons.jsx";
 
 function NavItem({ active, onClick, icon: Icon, label, badge }) {
@@ -34,13 +36,62 @@ export function PlatformShell({
 }) {
   const profileActive = section === "profile" || section === "settings";
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [section]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileNavOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileNavOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileNavOpen]);
 
   return (
     <div className="platLayout">
       <PlatformScBackground />
-      <aside className="platSidebar">
+
+      <header className="platMobileTopBar">
+        <button
+          type="button"
+          className="platMobileMenuBtn"
+          aria-label="Открыть меню"
+          aria-expanded={mobileNavOpen}
+          onClick={() => setMobileNavOpen(true)}
+        >
+          <IconMenu />
+        </button>
+        <span className="platMobileBrand">РЭЙТМИ</span>
+      </header>
+
+      <div
+        className={`platMobileBackdrop ${mobileNavOpen ? "platMobileBackdrop--visible" : ""}`}
+        aria-hidden={!mobileNavOpen}
+        onClick={() => setMobileNavOpen(false)}
+      />
+
+      <aside className={`platSidebar ${mobileNavOpen ? "platSidebar--open" : ""}`}>
         <div className="platSidebarBrand">
           <span className="platSidebarLogo">РЭЙТМИ</span>
+          <button
+            type="button"
+            className="platSidebarCloseBtn"
+            aria-label="Закрыть меню"
+            onClick={() => setMobileNavOpen(false)}
+          >
+            <IconClose />
+          </button>
         </div>
 
         <nav className="platNav" aria-label="Платформа">
