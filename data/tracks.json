@@ -1,0 +1,759 @@
+{
+  "tracks": [
+    {
+      "id": "69297fe8-6bf9-4bb9-aeac-cddae1b86a26",
+      "title": "univer • #YSG - я джугал весь их кэш",
+      "artist": "@univer ysg",
+      "criteria": {
+        "vibe": 6,
+        "svod": 8,
+        "text": 6,
+        "beat": 5,
+        "realization": 7,
+        "relevance": 7
+      },
+      "personalAverage": 6.5,
+      "chatAverage": 9,
+      "telegramTrackId": 346,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPQGoGKoH4NgnCPAyFBWe8sZBh0A0ZAAJ8oQACOuA5SEO8wPzFZ8b_OwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778792696482,
+      "chatRatingsLog": [
+        {
+          "user": "famalien1",
+          "score": 8,
+          "at": 1778793086816
+        },
+        {
+          "user": "unnaflex",
+          "score": 10,
+          "at": 1778793061631
+        }
+      ]
+    },
+    {
+      "id": "d0841d29-44a4-47e1-bb64-96e8b124cab8",
+      "title": "унатаг37",
+      "artist": "@unna de flex’o",
+      "criteria": {
+        "vibe": 7,
+        "svod": 5,
+        "text": 6,
+        "beat": 8,
+        "realization": 7,
+        "relevance": 7
+      },
+      "personalAverage": 6.67,
+      "chatAverage": 8.5,
+      "telegramTrackId": 347,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPUGoGKqFmaj7KVwf6rOjP2CiOs8PkAAL0nwACoWkwSCK_TXHmxnggOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778792728231,
+      "chatRatingsLog": [
+        {
+          "user": "unnaflex",
+          "score": 10,
+          "at": 1778793390976
+        },
+        {
+          "user": "famalien1",
+          "score": 7,
+          "at": 1778793388057
+        }
+      ]
+    },
+    {
+      "id": "fab9ffab-3c88-49a7-9b13-0bde9b518154",
+      "title": "circles0",
+      "artist": "@saf",
+      "criteria": {
+        "vibe": 8,
+        "svod": 5,
+        "text": 6,
+        "beat": 7,
+        "realization": 6,
+        "relevance": 6
+      },
+      "personalAverage": 6.33,
+      "chatAverage": 6,
+      "telegramTrackId": 348,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgUAAxkBAAIPX2oGKr0QptK0dWan0OO7rsUrUpR3AALxHQACaoxxVpsKu75ZAAFXUzsE",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778792755498,
+      "chatRatingsLog": [
+        {
+          "user": "unnaflex",
+          "score": 5,
+          "at": 1778793688604
+        },
+        {
+          "user": "famalien1",
+          "score": 7,
+          "at": 1778793678394
+        }
+      ]
+    },
+    {
+      "id": "047fe21c-18b6-4150-af6d-122269f2849f",
+      "title": "Семен Тимофей Денис",
+      "artist": "@unna de flex’o",
+      "criteria": {
+        "vibe": 6,
+        "svod": 4,
+        "text": 6,
+        "beat": 4,
+        "realization": 4,
+        "relevance": 5
+      },
+      "personalAverage": 4.83,
+      "chatAverage": 3.33,
+      "telegramTrackId": 350,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPbmoGKzs-UfDui3oTKPMZg1zgHMJKAAIHlAACj-woSnKPwWIVakdoOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778792881816,
+      "chatRatingsLog": [
+        {
+          "user": "spellsober716",
+          "score": 4,
+          "at": 1778794193526
+        },
+        {
+          "user": "famalien1",
+          "score": 5,
+          "at": 1778794151452
+        },
+        {
+          "user": "unnaflex",
+          "score": 1,
+          "at": 1778794136978
+        }
+      ]
+    },
+    {
+      "id": "f3e75c6b-7d48-4947-b336-727436bbb307",
+      "title": "Chrome Hearts",
+      "artist": "@L1lSwagg",
+      "criteria": {
+        "vibe": 3,
+        "svod": 3,
+        "text": 4,
+        "beat": 4,
+        "realization": 5,
+        "relevance": 4
+      },
+      "personalAverage": 3.83,
+      "chatAverage": 1.5,
+      "telegramTrackId": 351,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPiGoGLFjHMbO0qWXzQdAe5WNFzHSWAAI_oQACGqQxSAmkRRuHyV9uOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793167368,
+      "chatRatingsLog": [
+        {
+          "user": "famalien1",
+          "score": 2,
+          "at": 1778793910263
+        },
+        {
+          "user": "unnaflex",
+          "score": 1,
+          "at": 1778793885944
+        }
+      ]
+    },
+    {
+      "id": "1bd1e87e-3d43-40e7-87dd-900245c5b8a9",
+      "title": "PARENTAL final",
+      "artist": "@cherry hurt",
+      "criteria": {
+        "vibe": 4,
+        "svod": 6,
+        "text": 5,
+        "beat": 4,
+        "realization": 5,
+        "relevance": 3
+      },
+      "personalAverage": 4.5,
+      "chatAverage": 4.33,
+      "telegramTrackId": 352,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPlGoGLN1b-wOkjFDiS-nQ_rDX-r7nAAI_kgAClKhZS_ma2DQgEdOGOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793299045,
+      "chatRatingsLog": [
+        {
+          "user": "spellsober716",
+          "score": 6,
+          "at": 1778794540093
+        },
+        {
+          "user": "famalien1",
+          "score": 6,
+          "at": 1778794514429
+        },
+        {
+          "user": "unnaflex",
+          "score": 1,
+          "at": 1778794484348
+        }
+      ]
+    },
+    {
+      "id": "c2f14f71-83a5-43c7-8b68-e18cf0c4015d",
+      "title": "шестое-чувство-надеюсь-финал-5",
+      "artist": "@famalien",
+      "criteria": {
+        "vibe": 6,
+        "svod": 6,
+        "text": 6,
+        "beat": 7,
+        "realization": 5,
+        "relevance": 7
+      },
+      "personalAverage": 6.17,
+      "chatAverage": 8.75,
+      "telegramTrackId": 354,
+      "telegramLink": null,
+      "telegramCaption": "famalien",
+      "telegramFileId": "CQACAgIAAxkBAAIPfGoGK31bXXFhPD4omhBC3Usb28rZAAKOrgACwEQxSK0cpNJYSMl8OwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793328973,
+      "chatRatingsLog": [
+        {
+          "user": "spellsober716",
+          "score": 7,
+          "at": 1778794828572
+        },
+        {
+          "user": "unnaflex",
+          "score": 10,
+          "at": 1778794825701
+        },
+        {
+          "user": "cherryhurt",
+          "score": 10,
+          "at": 1778794823056
+        },
+        {
+          "user": "mmyspce",
+          "score": 8,
+          "at": 1778794812614
+        }
+      ]
+    },
+    {
+      "id": "125f48e7-e037-48c1-bf4e-d2f39f14f38a",
+      "title": "DRUG$ FREESTYLE FEAT. MAYBELLINE",
+      "artist": "@cherry hurt",
+      "criteria": {
+        "vibe": 5,
+        "svod": 5,
+        "text": 6,
+        "beat": 4,
+        "realization": 5,
+        "relevance": 6
+      },
+      "personalAverage": 5.17,
+      "chatAverage": 4.5,
+      "telegramTrackId": 355,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPqGoGLQyaHbFpM0qwUQ99ZDTH5a71AAJMnAACH8AgSFh5JL7FG0SSOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793346051,
+      "chatRatingsLog": [
+        {
+          "user": "mmyspce",
+          "score": 5,
+          "at": 1778795107994
+        },
+        {
+          "user": "chopolah192",
+          "score": 4,
+          "at": 1778795063799
+        },
+        {
+          "user": "famalien1",
+          "score": 5,
+          "at": 1778795061294
+        },
+        {
+          "user": "unnaflex",
+          "score": 4,
+          "at": 1778795057371
+        }
+      ]
+    },
+    {
+      "id": "d17e74fb-edc4-48f7-b40b-a8ec19ca2bbf",
+      "title": "платком",
+      "artist": "@vavvemonsta",
+      "criteria": {
+        "vibe": 6,
+        "svod": 5,
+        "text": 6,
+        "beat": 7,
+        "realization": 5,
+        "relevance": 5
+      },
+      "personalAverage": 5.67,
+      "chatAverage": 8,
+      "telegramTrackId": 356,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPr2oGLVys5E-4RtWdUnWIiQuFak0LAAKKmQACcCCgSn5jBj_3K8i1OwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793426936,
+      "chatRatingsLog": [
+        {
+          "user": "mmyspce",
+          "score": 7,
+          "at": 1778795539372
+        },
+        {
+          "user": "spellsober716",
+          "score": 10,
+          "at": 1778795538043
+        },
+        {
+          "user": "unnaflex",
+          "score": 7,
+          "at": 1778795501383
+        }
+      ]
+    },
+    {
+      "id": "0c5c4944-5fde-4d33-a870-c28263e4eaf8",
+      "title": "зщ",
+      "artist": "@рустем с ранчо",
+      "criteria": {
+        "vibe": 8,
+        "svod": 8,
+        "text": 7,
+        "beat": 8,
+        "realization": 8,
+        "relevance": 8
+      },
+      "personalAverage": 7.83,
+      "chatAverage": 8.33,
+      "telegramTrackId": 357,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPv2oGLphXEONTCn2_m76vyFca4bRAAAIdmgACWwEwSLnjwZhc3YitOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793764493,
+      "chatRatingsLog": [
+        {
+          "user": "unnaflex",
+          "score": 7,
+          "at": 1778795765723
+        },
+        {
+          "user": "mmyspce",
+          "score": 10,
+          "at": 1778795760396
+        },
+        {
+          "user": "famalien1",
+          "score": 8,
+          "at": 1778795746798
+        }
+      ]
+    },
+    {
+      "id": "e820ddd2-ec3c-4043-a75a-15e668b71bb9",
+      "title": "cdg1",
+      "artist": "@mmyspce",
+      "criteria": {
+        "vibe": 6,
+        "svod": 6,
+        "text": 5,
+        "beat": 5,
+        "realization": 6,
+        "relevance": 6
+      },
+      "personalAverage": 5.67,
+      "chatAverage": 4.5,
+      "telegramTrackId": 358,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIPymoGLyUU1CKRiosHlMLD1QZnzqiTAAKDowACa2QwSEJI7I63uxQtOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778793884056,
+      "chatRatingsLog": [
+        {
+          "user": "famalien1",
+          "score": 5,
+          "at": 1778796162626
+        },
+        {
+          "user": "unnaflex",
+          "score": 4,
+          "at": 1778796157692
+        }
+      ]
+    },
+    {
+      "id": "5034bed1-c131-4813-bd20-c8837ca5d8ff",
+      "title": "с-январем-микс-мастер-бай-янгчаг",
+      "artist": "@cherry hurt",
+      "criteria": {
+        "vibe": 5,
+        "svod": 6,
+        "text": 4,
+        "beat": 4,
+        "realization": 4,
+        "relevance": 4
+      },
+      "personalAverage": 4.5,
+      "chatAverage": 4,
+      "telegramTrackId": 360,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIP3moGMNRg0jwiYDmbgP-pnyBsAU3AAALYjgACLL6wS0oc0y_3MV2wOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778794314024,
+      "chatRatingsLog": [
+        {
+          "user": "unnaflex",
+          "score": 2,
+          "at": 1778796431882
+        },
+        {
+          "user": "famalien1",
+          "score": 6,
+          "at": 1778796430184
+        }
+      ]
+    },
+    {
+      "id": "324e321e-f5ed-46ec-bf08-ced9061ab937",
+      "title": "NEKIT SUMMER",
+      "artist": "@некич",
+      "criteria": {
+        "vibe": 8,
+        "svod": 5,
+        "text": 7,
+        "beat": 8,
+        "realization": 8,
+        "relevance": 10
+      },
+      "personalAverage": 7.67,
+      "chatAverage": 10,
+      "telegramTrackId": 361,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIP5WoGMnHewbYnoV0HJadCTXNDRwIRAALWoAACbnExSEPEpQTwlhxjOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778794765633,
+      "chatRatingsLog": [
+        {
+          "user": "mmyspce",
+          "score": 10,
+          "at": 1778795285781
+        },
+        {
+          "user": "unnaflex",
+          "score": 10,
+          "at": 1778795268868
+        },
+        {
+          "user": "famalien1",
+          "score": 10,
+          "at": 1778795249417
+        }
+      ]
+    },
+    {
+      "id": "c93824e3-44cb-42a1-b643-3ab7226c6ecc",
+      "title": "Alien",
+      "artist": "@cherry hurt",
+      "criteria": {
+        "vibe": 5,
+        "svod": 6,
+        "text": 4,
+        "beat": 5,
+        "realization": 5,
+        "relevance": 5
+      },
+      "personalAverage": 5,
+      "chatAverage": 5,
+      "telegramTrackId": 362,
+      "telegramLink": null,
+      "telegramCaption": "prod. by paymels",
+      "telegramFileId": "CQACAgIAAxkBAAIP9GoGNJ93rzhlYoB5LuAjUOYT9DGQAAL3owACWsWZS5W_ASQg2lgEOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778795285580,
+      "chatRatingsLog": [
+        {
+          "user": "famalien1",
+          "score": 6,
+          "at": 1778796710540
+        },
+        {
+          "user": "unnaflex",
+          "score": 4,
+          "at": 1778796696453
+        }
+      ]
+    },
+    {
+      "id": "a326d737-a614-4f05-a01c-df8d8d297c03",
+      "title": "demo 21.04",
+      "artist": "@famalien",
+      "criteria": {
+        "vibe": 5,
+        "svod": 5,
+        "text": 4,
+        "beat": 6,
+        "realization": 4,
+        "relevance": 5
+      },
+      "personalAverage": 4.83,
+      "chatAverage": 7,
+      "telegramTrackId": 363,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIQEWoGNljlfBGelbQt-wSqLOkMQofJAAL0rgACwEQxSF78GJnXPdr1OwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778795727395,
+      "chatRatingsLog": [
+        {
+          "user": "unnaflex",
+          "score": 7,
+          "at": 1778796952184
+        }
+      ]
+    },
+    {
+      "id": "2193b996-3f2c-42fe-a49c-7fdf8a2d771b",
+      "title": "Кто послушал чемпион",
+      "artist": "@DevilD",
+      "criteria": {
+        "vibe": 4,
+        "svod": 4,
+        "text": 5,
+        "beat": 5,
+        "realization": 5,
+        "relevance": 4
+      },
+      "personalAverage": 4.5,
+      "chatAverage": 4.33,
+      "telegramTrackId": 365,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIQLWoGOUKGTq2-v5lrWUnB7wU9wxO0AAKyqwACn08xSNshx5Ds_ag1OwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778796472960,
+      "chatRatingsLog": [
+        {
+          "user": "cherryhurt",
+          "score": 6,
+          "at": 1778797424990
+        },
+        {
+          "user": "famalien1",
+          "score": 4,
+          "at": 1778797289830
+        },
+        {
+          "user": "unnaflex",
+          "score": 3,
+          "at": 1778797277399
+        }
+      ]
+    },
+    {
+      "id": "f7a7de08-0f42-4d81-bfff-9659ec5f732b",
+      "title": "NOBLOCKY",
+      "artist": "@DevilD",
+      "criteria": {
+        "vibe": 6,
+        "svod": 4,
+        "text": 6,
+        "beat": 7,
+        "realization": 5,
+        "relevance": 7
+      },
+      "personalAverage": 5.83,
+      "chatAverage": 7,
+      "telegramTrackId": 366,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIQPGoGOq1FF27Z9uJqPOSYZYRVW_iAAALCqwACn08xSMHPOEOq0f5XOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778796836201,
+      "chatRatingsLog": [
+        {
+          "user": "famalien1",
+          "score": 1,
+          "at": 1778797588164
+        },
+        {
+          "user": "cherryhurt",
+          "score": 10,
+          "at": 1778797584608
+        },
+        {
+          "user": "unnaflex",
+          "score": 10,
+          "at": 1778797468628
+        }
+      ]
+    },
+    {
+      "id": "6d11ab58-0346-4406-a7a3-05de018f00d4",
+      "title": "mafia 156",
+      "artist": "@cherry hurt",
+      "criteria": {
+        "vibe": 4,
+        "svod": 6,
+        "text": 4,
+        "beat": 4,
+        "realization": 5,
+        "relevance": 4
+      },
+      "personalAverage": 4.5,
+      "chatAverage": 1.33,
+      "telegramTrackId": 367,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIQR2oGO4dCSYVKJlWkigjTooeHlCsqAAK-igACwPohSK7FNREejtHdOwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778797053893,
+      "chatRatingsLog": [
+        {
+          "user": "Dev1lD",
+          "score": 1,
+          "at": 1778797741606
+        },
+        {
+          "user": "famalien1",
+          "score": 2,
+          "at": 1778797709934
+        },
+        {
+          "user": "unnaflex",
+          "score": 1,
+          "at": 1778797700670
+        }
+      ]
+    },
+    {
+      "id": "e1cb481e-7c46-4aaf-b45f-ad4bc44ad3b1",
+      "title": "FAMALIEN - HEADPHONES [audiovk.com] (1)",
+      "artist": "@famalien",
+      "criteria": {
+        "vibe": 6,
+        "svod": 5,
+        "text": 4,
+        "beat": 7,
+        "realization": 5,
+        "relevance": 6
+      },
+      "personalAverage": 5.5,
+      "chatAverage": 4,
+      "telegramTrackId": 368,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "CQACAgIAAxkBAAIQTmoGPGBD5-bTFkCEpFf0JmO-By2YAAIKrwACwEQxSPQhtsY7GY60OwQ",
+      "telegramFileType": "audio",
+      "source": "telegram",
+      "createdAt": 1778797270946,
+      "chatRatingsLog": [
+        {
+          "user": "unnaflex",
+          "score": 4,
+          "at": 1778798003428
+        }
+      ]
+    },
+    {
+      "id": "3035b064-f2ab-47d6-9ac1-ddce8f939910",
+      "title": "vk.com/music",
+      "artist": "@DevilD",
+      "criteria": {
+        "vibe": 5,
+        "svod": 6,
+        "text": 5,
+        "beat": 6,
+        "realization": 5,
+        "relevance": 6
+      },
+      "personalAverage": 5.5,
+      "chatAverage": null,
+      "telegramTrackId": 370,
+      "telegramLink": "https://vk.com/music/playlist/646739784_30_0ed2cbd9392366c939",
+      "telegramCaption": "DevilD - Звериный рейв",
+      "telegramFileId": null,
+      "telegramFileType": null,
+      "source": "telegram",
+      "createdAt": 1778797731931
+    },
+    {
+      "id": "6c5239a8-534f-47a4-9ca3-536a2094a0fd",
+      "title": "music.yandex.ru/album",
+      "artist": "@https://music.yandex.ru/album/39",
+      "criteria": {
+        "vibe": 6,
+        "svod": 7,
+        "text": 5,
+        "beat": 7,
+        "realization": 7,
+        "relevance": 6
+      },
+      "personalAverage": 6.33,
+      "chatAverage": null,
+      "telegramTrackId": 371,
+      "telegramLink": "https://music.yandex.ru/album/39455976/track/145660073?utm_source=web&utm_medium=copy_link",
+      "telegramCaption": "The Party",
+      "telegramFileId": null,
+      "telegramFileType": null,
+      "source": "telegram",
+      "createdAt": 1778799095264
+    },
+    {
+      "id": "2350ac53-b47e-4a2d-a68c-501276826d49",
+      "title": "setter",
+      "artist": "@serene dâ riski",
+      "criteria": null,
+      "personalAverage": null,
+      "chatAverage": null,
+      "telegramTrackId": 372,
+      "telegramLink": null,
+      "telegramCaption": null,
+      "telegramFileId": "BQACAgIAAxkBAAIQgmoGSfYY0GVWgv6A_h0RhfV7hielAAKQoAACZvkwSD1p_r7Bt3bwOwQ",
+      "telegramFileType": "document",
+      "source": "telegram",
+      "createdAt": 1778800758712
+    }
+  ]
+}

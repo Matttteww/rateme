@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.log
+data/backups/
+
+# Отдельный проект (Telegram-бот), служебные файлы VS блокируют git add
+бот тг/
+**/.vs/
+cloudflared.exe
