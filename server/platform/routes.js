@@ -59,62 +59,123 @@ function multerWrap(mw) {
   };
 }
 
-function mapPost(row, db, viewerId) {
-  const author = db.prepare("SELECT id, username, display_name, avatar_path FROM users WHERE id = ?").get(row.user_id);
-  const attachments = db
-    .prepare("SELECT * FROM wall_attachments WHERE post_id = ? ORDER BY sort_order")
-    .all(row.id)
-    .map((a) => ({
-      id: a.id,
-      kind: a.kind,
-      url: a.file_path ? `/uploads/${a.file_path}` : a.url,
-    }));
-  const likeCount = db.prepare("SELECT COUNT(*) AS c FROM post_likes WHERE post_id = ?").get(row.id).c;
-  const liked = viewerId
-    ? db.prepare("SELECT 1 FROM post_likes WHERE post_id = ? AND user_id = ?").get(row.id, viewerId)
-    : null;
-  const commentCount = db.prepare("SELECT COUNT(*) AS c FROM post_comments WHERE post_id = ?").get(row.id).c;
-  let repostOf = null;
-  if (row.repost_of_id) {
-    const orig = db.prepare("SELECT * FROM wall_posts WHERE id = ? AND status = 'published'").get(row.repost_of_id);
-    if (orig) {
-      const oa = db.prepare("SELECT username, display_name FROM users WHERE id = ?").get(orig.user_id);
-      repostOf = {
+function sqlIn(ids) {
+  if (!ids.length) return { clause: "NULL", params: [] };
+  return { clause: ids.map(() => "?").join(","), params: ids };
+}
+
+/** Пакетная загрузка постов ленты (вместо N×6 запросов на каждый пост). */
+function mapPostsBatch(rows, db, viewerId) {
+  if (!rows.length) return [];
+
+  const postIds = rows.map((r) => r.id);
+  const userIds = [...new Set(rows.map((r) => r.user_id))];
+  const repostOfIds = [...new Set(rows.map((r) => r.repost_of_id).filter(Boolean))];
+
+  const authors = new Map();
+  const uIn = sqlIn(userIds);
+  if (userIds.length) {
+    db.prepare(`SELECT id, username, display_name, avatar_path FROM users WHERE id IN (${uIn.clause})`)
+      .all(...uIn.params)
+      .forEach((a) => authors.set(a.id, a));
+  }
+
+  const pIn = sqlIn(postIds);
+  const attachmentsByPost = new Map();
+  if (postIds.length) {
+    db.prepare(
+      `SELECT * FROM wall_attachments WHERE post_id IN (${pIn.clause}) ORDER BY post_id, sort_order`
+    )
+      .all(...pIn.params)
+      .forEach((a) => {
+        if (!attachmentsByPost.has(a.post_id)) attachmentsByPost.set(a.post_id, []);
+        attachmentsByPost.get(a.post_id).push({
+          id: a.id,
+          kind: a.kind,
+          url: a.file_path ? `/uploads/${a.file_path}` : a.url,
+        });
+      });
+  }
+
+  const likeCountByPost = new Map();
+  db.prepare(`SELECT post_id, COUNT(*) AS c FROM post_likes WHERE post_id IN (${pIn.clause}) GROUP BY post_id`)
+    .all(...pIn.params)
+    .forEach((r) => likeCountByPost.set(r.post_id, r.c));
+
+  const likedSet = new Set();
+  if (viewerId && postIds.length) {
+    db.prepare(`SELECT post_id FROM post_likes WHERE user_id = ? AND post_id IN (${pIn.clause})`)
+      .all(viewerId, ...pIn.params)
+      .forEach((r) => likedSet.add(r.post_id));
+  }
+
+  const commentCountByPost = new Map();
+  db.prepare(
+    `SELECT post_id, COUNT(*) AS c FROM post_comments WHERE post_id IN (${pIn.clause}) GROUP BY post_id`
+  )
+    .all(...pIn.params)
+    .forEach((r) => commentCountByPost.set(r.post_id, r.c));
+
+  const repostMap = new Map();
+  if (repostOfIds.length) {
+    const rIn = sqlIn(repostOfIds);
+    const origRows = db
+      .prepare(`SELECT * FROM wall_posts WHERE id IN (${rIn.clause}) AND status = 'published'`)
+      .all(...rIn.params);
+    const missingAuthorIds = [...new Set(origRows.map((o) => o.user_id).filter((id) => !authors.has(id)))];
+    if (missingAuthorIds.length) {
+      const mIn = sqlIn(missingAuthorIds);
+      db.prepare(`SELECT id, username, display_name, avatar_path FROM users WHERE id IN (${mIn.clause})`)
+        .all(...mIn.params)
+        .forEach((a) => authors.set(a.id, a));
+    }
+    for (const orig of origRows) {
+      const oa = authors.get(orig.user_id);
+      repostMap.set(orig.id, {
         id: orig.id,
         body: orig.body,
         author: oa ? { username: oa.username, displayName: oa.display_name || oa.username } : null,
-      };
+      });
     }
   }
+
   const now = Date.now();
-  return {
-    id: row.id,
-    userId: row.user_id,
-    body: row.body,
-    source: row.source,
-    repostOfId: row.repost_of_id,
-    repostComment: row.repost_comment,
-    repostOf,
-    editUntil: row.edit_until,
-    canEdit: viewerId === row.user_id && now <= row.edit_until,
-    isOwner: viewerId === row.user_id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    author: author
-      ? {
-          id: author.id,
-          username: author.username,
-          displayName: author.display_name || author.username,
-          avatarUrl: author.avatar_path ? `/uploads/${author.avatar_path}` : null,
-        }
-      : null,
-    attachments,
-    likeCount,
-    liked: Boolean(liked),
-    commentCount,
-    viewCount: row.view_count ?? 0,
-    pinnedAt: row.pinned_at != null ? row.pinned_at : null,
-  };
+  return rows.map((row) => {
+    const author = authors.get(row.user_id);
+    return {
+      id: row.id,
+      userId: row.user_id,
+      body: row.body,
+      source: row.source,
+      repostOfId: row.repost_of_id,
+      repostComment: row.repost_comment,
+      repostOf: row.repost_of_id ? repostMap.get(row.repost_of_id) || null : null,
+      editUntil: row.edit_until,
+      canEdit: viewerId === row.user_id && now <= row.edit_until,
+      isOwner: viewerId === row.user_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      author: author
+        ? {
+            id: author.id,
+            username: author.username,
+            displayName: author.display_name || author.username,
+            avatarUrl: author.avatar_path ? `/uploads/${author.avatar_path}` : null,
+          }
+        : null,
+      attachments: attachmentsByPost.get(row.id) || [],
+      likeCount: likeCountByPost.get(row.id) || 0,
+      liked: likedSet.has(row.id),
+      commentCount: commentCountByPost.get(row.id) || 0,
+      viewCount: row.view_count ?? 0,
+      pinnedAt: row.pinned_at != null ? row.pinned_at : null,
+    };
+  });
+}
+
+function mapPost(row, db, viewerId) {
+  const batch = mapPostsBatch([row], db, viewerId);
+  return batch[0];
 }
 
 function postLikeStats(db, postId, viewerId) {
@@ -431,7 +492,7 @@ function mountPlatformRoutes(app) {
       topMode,
       latestReleases,
       latestUploads,
-      recentPosts: postRows.map((p) => mapPost(p, db, viewerId)),
+      recentPosts: mapPostsBatch(postRows, db, viewerId),
     });
   });
 
@@ -1886,7 +1947,7 @@ function mountPlatformRoutes(app) {
     }
     const nextCursor = rows.length ? rows[rows.length - 1].created_at : null;
     res.json({
-      posts: rows.map((p) => mapPost(p, db, req.user?.id)),
+      posts: mapPostsBatch(rows, db, req.user?.id),
       nextCursor,
     });
   });
@@ -1947,7 +2008,7 @@ function mountPlatformRoutes(app) {
          ORDER BY CASE WHEN pinned_at IS NOT NULL THEN 0 ELSE 1 END, pinned_at DESC, created_at DESC LIMIT 50`
       )
       .all(u.id);
-    res.json({ posts: rows.map((p) => mapPost(p, db, req.user?.id)) });
+    res.json({ posts: mapPostsBatch(rows, db, req.user?.id) });
   });
 
   router.post("/wall/posts", requireAuth, multerWrap(uploadWallFiles), (req, res) => {

@@ -23,31 +23,39 @@ import { AuthScreen } from "./AuthScreen.jsx";
 import { PlatformShell } from "./PlatformShell.jsx";
 import { SectionHero } from "./SectionHero.jsx";
 import { IconBell } from "./PlatformIcons.jsx";
+import { KeepAliveSection } from "./KeepAliveSection.jsx";
 
 function FeedPage({ onViewProfile, onNeedAuth }) {
   const [posts, setPosts] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [feedMode, setFeedMode] = useState("all");
   const { user } = useAuth();
 
-  const load = useCallback((cursor, append, mode) => {
+  const load = useCallback((cursor, append, mode, signal) => {
     const params = new URLSearchParams();
     if (cursor) params.set("cursor", String(cursor));
     params.set("mode", mode || "all");
     const q = `?${params.toString()}`;
-    return api(`/api/feed${q}`)
+    return api(`/api/feed${q}`, { signal })
       .then((j) => {
         setPosts((prev) => (append ? [...prev, ...(j.posts || [])] : j.posts || []));
         setNextCursor(j.nextCursor || null);
       })
-      .catch(() => {
+      .catch((e) => {
+        if (e?.name === "AbortError") return;
         if (!append) setPosts([]);
       });
   }, []);
 
   useEffect(() => {
-    load(null, false, feedMode);
+    const ac = new AbortController();
+    setLoading(true);
+    load(null, false, feedMode, ac.signal).finally(() => {
+      if (!ac.signal.aborted) setLoading(false);
+    });
+    return () => ac.abort();
   }, [load, feedMode]);
 
   const loadMore = async () => {
@@ -61,7 +69,7 @@ function FeedPage({ onViewProfile, onNeedAuth }) {
   };
 
   return (
-    <div className="platformStack feedPage">
+    <div className={`platformStack feedPage${loading ? " feedPage--loading" : ""}`}>
       <SectionHero
         eyebrow="Главная"
         title="Лента"
@@ -89,17 +97,14 @@ function FeedPage({ onViewProfile, onNeedAuth }) {
           Подписки
         </button>
       </div>
-      {user && (
-        <div className="sectionPanel" style={{ animationDelay: "0.16s" }}>
+      {loading && <p className="feedPage__loading muted">Загрузка ленты…</p>}
+      {user && !loading && (
+        <div className="sectionPanel" style={{ animationDelay: "0.12s" }}>
           <WallPostForm onPosted={() => load(null, false, feedMode)} />
         </div>
       )}
-      {posts.map((p, index) => (
-        <div
-          key={p.id}
-          className="sectionPanel"
-          style={{ animationDelay: `${0.2 + Math.min(index, 10) * 0.05}s` }}
-        >
+      {posts.map((p) => (
+        <div key={p.id} className="feedPostSlot">
           <FeedPost
             post={p}
             onViewProfile={onViewProfile}
@@ -110,8 +115,8 @@ function FeedPage({ onViewProfile, onNeedAuth }) {
           />
         </div>
       ))}
-      {posts.length === 0 && (
-        <p className="muted feedPage__empty sectionPanel" style={{ animationDelay: "0.2s" }}>
+      {!loading && posts.length === 0 && (
+        <p className="muted feedPage__empty">
           {feedMode === "following" && !user
             ? "Войдите, чтобы видеть ленту подписок"
             : feedMode === "following"
@@ -119,14 +124,8 @@ function FeedPage({ onViewProfile, onNeedAuth }) {
               : "Лента пуста"}
         </p>
       )}
-      {nextCursor && (
-        <button
-          type="button"
-          className="btn btnGhost sectionPanel"
-          style={{ animationDelay: "0.25s" }}
-          disabled={loadingMore}
-          onClick={loadMore}
-        >
+      {nextCursor && !loading && (
+        <button type="button" className="btn btnGhost" disabled={loadingMore} onClick={loadMore}>
           {loadingMore ? "…" : "Ещё посты"}
         </button>
       )}
@@ -440,61 +439,6 @@ export function PlatformApp() {
 
   const goAuth = () => navigate({ section: "auth" });
 
-  let body = null;
-  if (section === "feed") body = <FeedPage onViewProfile={openProfile} onNeedAuth={goAuth} />;
-  else if (section === "profile" && profileUsername)
-    body = (
-      <ProfilePage
-        username={profileUsername}
-        onBack={() => navigate({ section: "feed" })}
-        onOpenMessages={() => navigate({ section: "messages" })}
-        onViewProfile={openProfile}
-        onOpenSettings={() => navigate({ section: "settings" })}
-        onNeedAuth={goAuth}
-      />
-    );
-  else if (section === "messages")
-    body = (
-      <MessagesPage
-        initialConversationId={pendingDmConvId}
-        onConversationOpened={() => setPendingDmConvId(null)}
-        onNeedAuth={goAuth}
-      />
-    );
-  else if (section === "myTracks")
-    body = (
-      <MyTracksPage
-        onViewProfile={openProfile}
-        highlightReleaseId={highlightReleaseId}
-        onNeedAuth={goAuth}
-      />
-    );
-  else if (section === "beats")
-    body = (
-      <BeatsFeedPage onViewProfile={openProfile} onMessageUser={openDmWith} />
-    );
-  else if (section === "myBeats")
-    body = <MyBeatsPage onViewProfile={openProfile} />;
-  else if (section === "settings")
-    body = (
-      <div className="settingsPageWrap">
-        <SettingsPage />
-        <TelegramPanel />
-      </div>
-    );
-  else if (section === "telegram") body = <TelegramPanel />;
-  else if (section === "admin") body = <AdminPage />;
-  else if (section === "openvers")
-    body = (
-      <OpenversFeedPage
-        onViewProfile={openProfile}
-        onMessageUser={openDmWith}
-        onNeedAuth={goAuth}
-      />
-    );
-  else if (section === "top") body = <TopPage onViewProfile={openProfile} />;
-  else if (section === "rate") body = <RatePage onViewProfile={openProfile} onNeedAuth={goAuth} />;
-  else if (section === "king") body = <KingPage onViewProfile={openProfile} />;
   if (section === "auth" && !user && !loading) {
     return (
       <AuthScreen
@@ -517,7 +461,69 @@ export function PlatformApp() {
           {tgError}
         </p>
       )}
-      {loading ? <p className="muted platLoading">Загрузка сессии…</p> : body}
+      {loading ? (
+        <p className="muted platLoading">Загрузка сессии…</p>
+      ) : (
+        <>
+          <KeepAliveSection active={section === "feed"}>
+            <FeedPage onViewProfile={openProfile} onNeedAuth={goAuth} />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "rate"}>
+            <RatePage onViewProfile={openProfile} onNeedAuth={goAuth} />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "top"}>
+            <TopPage onViewProfile={openProfile} />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "king"}>
+            <KingPage onViewProfile={openProfile} />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "myTracks"}>
+            <MyTracksPage
+              onViewProfile={openProfile}
+              highlightReleaseId={highlightReleaseId}
+              onNeedAuth={goAuth}
+            />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "beats"}>
+            <BeatsFeedPage onViewProfile={openProfile} onMessageUser={openDmWith} />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "openvers"}>
+            <OpenversFeedPage
+              onViewProfile={openProfile}
+              onMessageUser={openDmWith}
+              onNeedAuth={goAuth}
+            />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "messages"}>
+            <MessagesPage
+              initialConversationId={pendingDmConvId}
+              onConversationOpened={() => setPendingDmConvId(null)}
+              onNeedAuth={goAuth}
+            />
+          </KeepAliveSection>
+          <KeepAliveSection active={section === "myBeats"}>
+            <MyBeatsPage onViewProfile={openProfile} />
+          </KeepAliveSection>
+          {section === "profile" && profileUsername && (
+            <ProfilePage
+              username={profileUsername}
+              onBack={() => navigate({ section: "feed" })}
+              onOpenMessages={() => navigate({ section: "messages" })}
+              onViewProfile={openProfile}
+              onOpenSettings={() => navigate({ section: "settings" })}
+              onNeedAuth={goAuth}
+            />
+          )}
+          {section === "settings" && (
+            <div className="settingsPageWrap">
+              <SettingsPage />
+              <TelegramPanel />
+            </div>
+          )}
+          {section === "telegram" && <TelegramPanel />}
+          {section === "admin" && <AdminPage />}
+        </>
+      )}
     </PlatformShell>
   );
 }

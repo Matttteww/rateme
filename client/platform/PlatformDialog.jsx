@@ -70,13 +70,13 @@ export function PlatformDialog({
         {children ? <div className="platDialog__body">{children}</div> : null}
         <div className="platDialog__actions">
           {showSecondary ? (
-            <button type="button" className="btn btnGhost platDialog__btn" onClick={onClose} disabled={busy}>
+            <button type="button" className="platDialog__btn platDialog__btn--ghost" onClick={onClose} disabled={busy}>
               {secondaryLabel}
             </button>
           ) : null}
           <button
             type="button"
-            className="btn platDialog__btn platDialog__btn--primary"
+            className="platDialog__btn platDialog__btn--primary"
             disabled={primaryDisabled || busy}
             onClick={onPrimary}
           >

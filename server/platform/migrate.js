@@ -130,6 +130,15 @@ function migratePlatformDb() {
   }
 
   try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_wall_posts_feed ON wall_posts(status, created_at DESC)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_post_likes_post ON post_likes(post_id)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_post_comments_post ON post_comments(post_id)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_wall_attachments_post ON wall_attachments(post_id)`);
+  } catch {
+    /* */
+  }
+
+  try {
     db.exec(`
       UPDATE wall_posts
       SET view_count = (

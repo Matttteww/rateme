@@ -152,7 +152,7 @@ function CommentNode({ node, user, replyTo, setReplyTo, onReplySent, postId, onV
   );
 }
 
-export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onReposted, allowPin = false, onNeedAuth }) {
+function FeedPostInner({ post: initial, onUpdate, onViewProfile, onRemove, onReposted, allowPin = false, onNeedAuth }) {
   const { user } = useAuth();
   const [post, setPost] = useState(initial);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -636,3 +636,5 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
     </article>
   );
 }
+
+export const FeedPost = React.memo(FeedPostInner);
