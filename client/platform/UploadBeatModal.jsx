@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
+import { AUDIO_FILE_ACCEPT } from "./mediaAccept.js";
+import { GuestGateCard } from "./GuestGateCard.jsx";
 import { createPortal } from "react-dom";
 import { useAuth } from "./AuthContext.jsx";
 import { api } from "./api.js";
@@ -17,7 +19,7 @@ function titleFromFileName(fileName) {
   return base.replace(/[_]+/g, " ").replace(/-+/g, " - ").trim() || fileName;
 }
 
-export function UploadBeatForm({ onSuccess }) {
+export function UploadBeatForm({ onSuccess, onNeedAuth }) {
   const { user } = useAuth();
   const [title, setTitle] = useState("");
   const [artistDisplay, setArtistDisplay] = useState("");
@@ -30,14 +32,24 @@ export function UploadBeatForm({ onSuccess }) {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const fileInputId = "upload-beat-file-input";
+  const fileInputId = useId().replace(/:/g, "");
 
   useEffect(() => {
     if (!user) return;
     setArtistDisplay(user.displayName || user.username || "");
   }, [user]);
 
-  if (!user) return <p className="muted">Войдите, чтобы загружать.</p>;
+  if (!user) {
+    return (
+      <GuestGateCard
+        icon="upload"
+        compact
+        title="Загрузка — для своих"
+        subtitle="Войдите, чтобы публиковать биты."
+        onAction={onNeedAuth}
+      />
+    );
+  }
 
   const applyAudioFile = (f) => {
     if (!f) {
@@ -180,19 +192,21 @@ export function UploadBeatForm({ onSuccess }) {
           if (f) applyAudioFile(f);
         }}
       >
-        <input
-          id={fileInputId}
-          type="file"
-          accept="audio/*"
-          className="uploadTrackForm__fileInput"
-          onChange={(e) => applyAudioFile(e.target.files?.[0] || null)}
-        />
-        <label htmlFor={fileInputId} className="uploadTrackForm__dropInner">
-          <span className="uploadTrackForm__dropIcon" aria-hidden>
-            ↑
+        <label htmlFor={fileInputId} className="uploadTrackForm__dropLabel">
+          <input
+            id={fileInputId}
+            type="file"
+            accept={AUDIO_FILE_ACCEPT}
+            className="uploadTrackForm__fileInput"
+            onChange={(e) => applyAudioFile(e.target.files?.[0] || null)}
+          />
+          <span className="uploadTrackForm__dropInner">
+            <span className="uploadTrackForm__dropIcon" aria-hidden>
+              ↑
+            </span>
+            <span className="uploadTrackForm__dropTitle">{file ? file.name : "Выберите аудиофайл"}</span>
+            <span className="uploadTrackForm__dropHint">mp3 / wav / m4a · нажмите для выбора</span>
           </span>
-          <span className="uploadTrackForm__dropTitle">{file ? file.name : "Выберите аудиофайл"}</span>
-          <span className="uploadTrackForm__dropHint">mp3 / wav · нажмите или перетащите</span>
         </label>
       </div>
 
@@ -220,7 +234,7 @@ export function UploadBeatForm({ onSuccess }) {
   );
 }
 
-export function UploadBeatFormModal({ buttonLabel, onSuccess }) {
+export function UploadBeatFormModal({ buttonLabel, onSuccess, onNeedAuth }) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
 
@@ -265,7 +279,7 @@ export function UploadBeatFormModal({ buttonLabel, onSuccess }) {
               <button type="button" className="uploadModal__close" onClick={close} aria-label="Закрыть">
                 ×
               </button>
-              <UploadBeatForm onSuccess={handleSuccess} />
+              <UploadBeatForm onSuccess={handleSuccess} onNeedAuth={onNeedAuth} />
             </div>
           </div>,
           document.body

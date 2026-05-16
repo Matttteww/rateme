@@ -119,6 +119,7 @@ export function OpenversFeedPage({ onViewProfile, onMessageUser, onNeedAuth }) {
                 playCount={it.playCount ?? 0}
                 likeBusy={likeBusy === it.id}
                 onToggleLike={() => toggleLike(it)}
+                onNeedAuth={onNeedAuth}
                 onViewProfile={onViewProfile}
                 onMessageUser={onMessageUser}
                 currentUsername={user?.username}

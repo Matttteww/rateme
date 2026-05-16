@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useAuth } from "./AuthContext.jsx";
 import { TrackAudioPlayer } from "./TrackAudioPlayer.jsx";
 import { downloadMediaItem } from "./audioDownload.js";
 
@@ -18,8 +19,10 @@ export function AudioCard({
   playCount,
   likeBusy = false,
   onToggleLike,
+  onNeedAuth,
   actionsLayout = "stack",
 }) {
+  const { user } = useAuth();
   const [dlBusy, setDlBusy] = useState(false);
   const [dlErr, setDlErr] = useState("");
   if (!item) return null;
@@ -132,13 +135,18 @@ export function AudioCard({
             {showLike && (
               <button
                 type="button"
-                className={`audioCard__likeBtn ${liked ? "audioCard__likeBtn--active" : ""}`}
+                className={`audioCard__likeBtn ${liked ? "audioCard__likeBtn--active" : ""} ${!user ? "audioCard__likeBtn--guest" : ""}`}
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (!user) {
+                    onNeedAuth?.();
+                    return;
+                  }
                   onToggleLike?.();
                 }}
                 disabled={likeBusy}
                 aria-pressed={liked}
+                title={!user ? "Войдите, чтобы ставить лайк" : undefined}
               >
                 <span className="audioCard__likeIcon" aria-hidden>
                   {liked ? "♥" : "♡"}

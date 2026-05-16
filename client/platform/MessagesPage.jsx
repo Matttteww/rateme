@@ -4,6 +4,10 @@ import { api } from "./api.js";
 import { usePlatformWs } from "./usePlatformWs.js";
 import { IconMessage } from "./PlatformIcons.jsx";
 import { SectionHero } from "./SectionHero.jsx";
+import { GuestGateCard } from "./GuestGateCard.jsx";
+import { DM_ATTACH_ACCEPT } from "./mediaAccept.js";
+
+const DM_MOBILE_MQ = "(max-width: 900px)";
 
 function formatMsgTime(ts) {
   return new Date(ts).toLocaleString("ru-RU", {
@@ -14,8 +18,9 @@ function formatMsgTime(ts) {
   });
 }
 
-export function MessagesPage({ initialConversationId, onConversationOpened }) {
+export function MessagesPage({ initialConversationId, onConversationOpened, onNeedAuth }) {
   const { user } = useAuth();
+  const [isMobileDm, setIsMobileDm] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -25,6 +30,15 @@ export function MessagesPage({ initialConversationId, onConversationOpened }) {
   const [searchHits, setSearchHits] = useState([]);
   const [err, setErr] = useState("");
   const bottomRef = useRef(null);
+  const dmFileRef = useRef(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia(DM_MOBILE_MQ);
+    const sync = () => setIsMobileDm(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   const loadConversations = useCallback(() => {
     api("/api/dm/conversations")
@@ -135,25 +149,41 @@ export function MessagesPage({ initialConversationId, onConversationOpened }) {
           sub="Переписка с артистами и слушателями платформы"
           tone="violet"
         />
-        <p className="muted dmGuestHint sectionPanel" style={{ animationDelay: "0.1s" }}>
-          Войдите, чтобы писать в ЛС.
-        </p>
+        <div className="sectionPanel" style={{ animationDelay: "0.1s" }}>
+          <GuestGateCard
+            icon="message"
+            title="Личные сообщения — для своих"
+            subtitle="Войдите или зарегистрируйтесь, чтобы писать артистам и слушателям."
+            onAction={onNeedAuth}
+          />
+        </div>
       </div>
     );
   }
 
   const active = conversations.find((c) => c.id === activeId);
   const other = active?.otherUser;
+  const mobileChatOpen = isMobileDm && Boolean(activeId);
+  const dmPageClass = [
+    "dmPage",
+    "sectionPanel",
+    mobileChatOpen ? "dmPage--chatView" : "",
+    isMobileDm && !activeId ? "dmPage--listView" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <div className="platformStack messagesPage">
-      <SectionHero
-        eyebrow="Общение"
-        title="Личные сообщения"
-        sub="Диалоги, вложения и уведомления в реальном времени"
-        tone="violet"
-      />
-      <div className="dmPage sectionPanel" style={{ animationDelay: "0.1s" }}>
+    <div className={`platformStack messagesPage ${mobileChatOpen ? "messagesPage--dmChat" : ""}`}>
+      {!mobileChatOpen && (
+        <SectionHero
+          eyebrow="Общение"
+          title="Личные сообщения"
+          sub="Диалоги, вложения и уведомления в реальном времени"
+          tone="violet"
+        />
+      )}
+      <div className={dmPageClass} style={{ animationDelay: "0.1s" }}>
       <aside className="dmSidebar">
         <header className="dmSidebarHead">
           <span className="dmSidebarHeadIcon" aria-hidden>
@@ -250,7 +280,7 @@ export function MessagesPage({ initialConversationId, onConversationOpened }) {
       <section className="dmChat">
         {err && <p className="formErr dmChatErr">{err}</p>}
 
-        {!activeId && (
+        {!activeId && !isMobileDm && (
           <div className="dmChatEmpty">
             <span className="dmChatEmptyIcon" aria-hidden>
               <IconMessage />
@@ -263,6 +293,16 @@ export function MessagesPage({ initialConversationId, onConversationOpened }) {
         {active && (
           <>
             <header className="dmChatHead">
+              {mobileChatOpen && (
+                <button
+                  type="button"
+                  className="dmChatBack"
+                  aria-label="К списку диалогов"
+                  onClick={() => setActiveId(null)}
+                >
+                  ←
+                </button>
+              )}
               {other?.avatarUrl ? (
                 <img src={other.avatarUrl} alt="" className="dmChatHead__avatar" />
               ) : (
@@ -312,15 +352,21 @@ export function MessagesPage({ initialConversationId, onConversationOpened }) {
                 className="dmSendForm__input"
               />
               <div className="dmSendForm__actions">
-                <label className="dmSendForm__attach">
-                  <input
-                    type="file"
-                    multiple
-                    className="dmSendForm__file"
-                    onChange={(e) => setFiles(Array.from(e.target.files || []))}
-                  />
+                <button
+                  type="button"
+                  className="dmSendForm__attach"
+                  onClick={() => dmFileRef.current?.click()}
+                >
                   {files.length ? `Файлов: ${files.length}` : "Вложить"}
-                </label>
+                </button>
+                <input
+                  ref={dmFileRef}
+                  type="file"
+                  multiple
+                  accept={DM_ATTACH_ACCEPT}
+                  className="dmSendForm__file"
+                  onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                />
                 <button type="submit" className="dmSendForm__send">
                   Отправить
                 </button>

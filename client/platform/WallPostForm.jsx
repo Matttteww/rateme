@@ -1,11 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { api } from "./api.js";
 import { IconAttach } from "./PlatformIcons.jsx";
 
 export function WallPostForm({ onPosted, compact }) {
   const { user } = useAuth();
-  const fileRef = useRef(null);
   const [text, setText] = useState("");
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -51,17 +50,16 @@ export function WallPostForm({ onPosted, compact }) {
       </div>
       <div className="composeToolbar">
         <div className="composeTools">
-          <button type="button" className="composeToolBtn" onClick={() => fileRef.current?.click()} title="Вложение">
+          <label className="composeToolBtn composeToolBtn--file" title="Вложение">
             <IconAttach />
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            multiple
-            accept="image/*,video/*"
-            className="composeFileHidden"
-            onChange={(e) => setFiles(Array.from(e.target.files || []))}
-          />
+            <input
+              type="file"
+              multiple
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,image/*,video/*"
+              className="composeFileHidden"
+              onChange={(e) => setFiles(Array.from(e.target.files || []))}
+            />
+          </label>
           {files.length > 0 && <span className="muted composeFileCount">{files.length} файл(ов)</span>}
         </div>
         <button type="submit" className="composePublish" disabled={busy || (!text.trim() && !files.length)}>

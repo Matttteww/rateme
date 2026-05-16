@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { api } from "./api.js";
+import { GuestGateCard } from "./GuestGateCard.jsx";
 
 const SMALL_MEDIA_PX = 320;
 
@@ -143,10 +144,11 @@ function CommentNode({ node, user, replyTo, setReplyTo, onReplySent, postId, onV
   );
 }
 
-export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onReposted, allowPin = false }) {
+export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onReposted, allowPin = false, onNeedAuth }) {
   const { user } = useAuth();
   const [post, setPost] = useState(initial);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [guestActionHint, setGuestActionHint] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState(null);
@@ -199,7 +201,12 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
   };
 
   const toggleLike = async () => {
-    if (!user) return;
+    if (!user) {
+      setGuestActionHint("like");
+      onNeedAuth?.();
+      return;
+    }
+    setGuestActionHint(null);
     setBusy(true);
     try {
       const j = post.liked
@@ -221,6 +228,11 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
   const openComments = async () => {
     const next = !commentsOpen;
     setCommentsOpen(next);
+    if (!user && next) {
+      setGuestActionHint("comment");
+      onNeedAuth?.();
+      return;
+    }
     if (next && comments.length === 0) await loadComments().catch(() => {});
   };
 
@@ -366,9 +378,10 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
         </span>
         <button
           type="button"
-          className={`wallActionBtn ${post.liked ? "wallActionBtn--liked" : ""}`}
-          disabled={!user || busy}
+          className={`wallActionBtn ${post.liked ? "wallActionBtn--liked" : ""} ${!user ? "wallActionBtn--guest" : ""}`}
+          disabled={busy}
           onClick={toggleLike}
+          title={!user ? "Войдите, чтобы ставить лайки" : undefined}
         >
           <span className="wallActionBtn__icon">{post.liked ? "♥" : "♡"}</span>
           <span>{post.likeCount}</span>
@@ -414,6 +427,17 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
           </button>
         )}
       </div>
+      {guestActionHint && !user && (
+        <div className="wallGuestHint">
+          <GuestGateCard
+            compact
+            icon={guestActionHint === "comment" ? "message" : "heart"}
+            title={guestActionHint === "comment" ? "Комментарии — для своих" : "Лайки — только для своих"}
+            subtitle="Войдите или зарегистрируйтесь, чтобы участвовать в обсуждении."
+            onAction={onNeedAuth}
+          />
+        </div>
+      )}
       {commentsOpen && (
         <div className="wallComments wallComments--open">
           <ol className="wallCommentList">
@@ -451,7 +475,13 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
               </button>
             </form>
           ) : (
-            <p className="muted">Войдите, чтобы комментировать</p>
+            <GuestGateCard
+              compact
+              icon="message"
+              title="Комментарии — для своих"
+              subtitle="Войдите, чтобы обсуждать пост."
+              onAction={onNeedAuth}
+            />
           )}
         </div>
       )}

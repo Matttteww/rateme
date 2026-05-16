@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { GuestGateCard } from "./GuestGateCard.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { api } from "./api.js";
 import { TrackAudioPlayer } from "./TrackAudioPlayer.jsx";
@@ -106,7 +107,7 @@ function RateEmpty({ message }) {
   );
 }
 
-export function RatePage({ onViewProfile }) {
+export function RatePage({ onViewProfile, onNeedAuth }) {
   const { user } = useAuth();
   const [item, setItem] = useState(null);
   const [done, setDone] = useState("");
@@ -192,7 +193,12 @@ export function RatePage({ onViewProfile }) {
     return (
       <div className="platformStack rateFeedPage rateFeedPage--idle">
         <RateFeedHero sub="Войди и слушай релизы других — ставь честные оценки" />
-        <p className="rateFeedPage__authHint">Войдите, чтобы заценивать треки</p>
+        <GuestGateCard
+          icon="star"
+          title="Зацен треков — для своих"
+          subtitle="Войдите или зарегистрируйтесь, чтобы слушать релизы и ставить оценки."
+          onAction={onNeedAuth}
+        />
       </div>
     );
   }

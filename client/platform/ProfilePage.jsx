@@ -91,7 +91,7 @@ function sortProfileWallPosts(list) {
   });
 }
 
-export function ProfilePage({ username, onBack, onOpenMessages, onViewProfile }) {
+export function ProfilePage({ username, onBack, onOpenMessages, onViewProfile, onNeedAuth }) {
   const { user: me } = useAuth();
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -397,6 +397,7 @@ export function ProfilePage({ username, onBack, onOpenMessages, onViewProfile })
                   key={p.id}
                   post={p}
                   onViewProfile={onViewProfile}
+                  onNeedAuth={onNeedAuth}
                   allowPin={isSelf}
                   onRemove={(id) => setPosts((list) => list.filter((x) => x.id !== id))}
                   onUpdate={(updated) =>

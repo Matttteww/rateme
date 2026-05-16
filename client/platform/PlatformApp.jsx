@@ -24,7 +24,7 @@ import { PlatformShell } from "./PlatformShell.jsx";
 import { SectionHero } from "./SectionHero.jsx";
 import { IconBell } from "./PlatformIcons.jsx";
 
-function FeedPage({ onViewProfile }) {
+function FeedPage({ onViewProfile, onNeedAuth }) {
   const [posts, setPosts] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -103,6 +103,7 @@ function FeedPage({ onViewProfile }) {
           <FeedPost
             post={p}
             onViewProfile={onViewProfile}
+            onNeedAuth={onNeedAuth}
             onUpdate={(u) => setPosts((list) => list.map((x) => (x.id === u.id ? u : x)))}
             onRemove={(id) => setPosts((list) => list.filter((x) => x.id !== id))}
             onReposted={() => load(null, false, feedMode)}
@@ -437,8 +438,10 @@ export function PlatformApp() {
     navigate({ section: id });
   };
 
+  const goAuth = () => navigate({ section: "auth" });
+
   let body = null;
-  if (section === "feed") body = <FeedPage onViewProfile={openProfile} />;
+  if (section === "feed") body = <FeedPage onViewProfile={openProfile} onNeedAuth={goAuth} />;
   else if (section === "profile" && profileUsername)
     body = (
       <ProfilePage
@@ -447,6 +450,7 @@ export function PlatformApp() {
         onOpenMessages={() => navigate({ section: "messages" })}
         onViewProfile={openProfile}
         onOpenSettings={() => navigate({ section: "settings" })}
+        onNeedAuth={goAuth}
       />
     );
   else if (section === "messages")
@@ -454,6 +458,7 @@ export function PlatformApp() {
       <MessagesPage
         initialConversationId={pendingDmConvId}
         onConversationOpened={() => setPendingDmConvId(null)}
+        onNeedAuth={goAuth}
       />
     );
   else if (section === "myTracks")
@@ -461,6 +466,7 @@ export function PlatformApp() {
       <MyTracksPage
         onViewProfile={openProfile}
         highlightReleaseId={highlightReleaseId}
+        onNeedAuth={goAuth}
       />
     );
   else if (section === "beats")
@@ -483,11 +489,11 @@ export function PlatformApp() {
       <OpenversFeedPage
         onViewProfile={openProfile}
         onMessageUser={openDmWith}
-        onNeedAuth={() => navigate({ section: "auth" })}
+        onNeedAuth={goAuth}
       />
     );
   else if (section === "top") body = <TopPage onViewProfile={openProfile} />;
-  else if (section === "rate") body = <RatePage onViewProfile={openProfile} />;
+  else if (section === "rate") body = <RatePage onViewProfile={openProfile} onNeedAuth={goAuth} />;
   else if (section === "king") body = <KingPage onViewProfile={openProfile} />;
   if (section === "auth" && !user && !loading) {
     return (

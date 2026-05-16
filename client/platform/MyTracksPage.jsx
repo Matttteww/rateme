@@ -126,7 +126,7 @@ function MyTrackStats({ item }) {
   );
 }
 
-export function MyTracksPage({ onViewProfile, highlightReleaseId }) {
+export function MyTracksPage({ onViewProfile, highlightReleaseId, onNeedAuth }) {
   const { user } = useAuth();
   const [releases, setReleases] = useState([]);
   const [openvers, setOpenvers] = useState([]);
@@ -235,6 +235,7 @@ export function MyTracksPage({ onViewProfile, highlightReleaseId }) {
               label="Добавить"
               buttonLabel="＋ Добавить"
               onSuccess={handleUploadSuccess}
+              onNeedAuth={onNeedAuth}
             />
           </div>
           <div className="myTracksTabs" role="tablist" aria-label="Разделы">

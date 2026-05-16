@@ -16,7 +16,7 @@ function formatBeatCount(n) {
   return `${n} битов`;
 }
 
-export function MyBeatsPage({ onViewProfile }) {
+export function MyBeatsPage({ onViewProfile, onNeedAuth }) {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [err, setErr] = useState("");
@@ -51,7 +51,7 @@ export function MyBeatsPage({ onViewProfile }) {
                 <span className="myBeatsHero__count">{formatBeatCount(items.length)}</span>
               </h2>
               <div className="myBeatsHero__action">
-                <UploadBeatFormModal buttonLabel="＋ Загрузить" onSuccess={load} />
+                <UploadBeatFormModal buttonLabel="＋ Загрузить" onSuccess={load} onNeedAuth={onNeedAuth} />
               </div>
             </div>
           </div>
