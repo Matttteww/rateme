@@ -4505,6 +4505,7 @@
   background: linear-gradient(165deg, rgba(28, 24, 20, 0.92), rgba(14, 12, 10, 0.88));
   border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  animation: platContentIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .wallPost__head {
@@ -4678,7 +4679,31 @@
   font-size: 0.86rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wallActionBtn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.wallActionBtn--pulse .wallActionBtn__icon {
+  animation: wallLikePop 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes wallLikePop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .wallActionBtn:hover:not(:disabled) {
@@ -4722,12 +4747,41 @@
   line-height: 1;
 }
 
-.wallComments--open {
+.wallCommentsWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  margin-top: 0;
+  transition:
+    grid-template-rows 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease,
+    margin-top 0.32s ease;
+}
+
+.wallCommentsWrap--open {
+  grid-template-rows: 1fr;
+  opacity: 1;
   margin-top: 14px;
-  padding: 14px;
+}
+
+.wallComments {
+  overflow: hidden;
+  min-height: 0;
+  padding: 0 14px;
   border-radius: 14px;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: padding 0.32s ease;
+}
+
+.wallCommentsWrap--open .wallComments {
+  padding: 14px;
+}
+
+.wallCommentsLoading {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  animation: platPulse 1.2s ease-in-out infinite;
 }
 
 .wallCommentList {
@@ -4741,6 +4795,18 @@
 
 .wallComment {
   list-style: none;
+}
+
+.wallComment--enter .wallComment__inner {
+  animation: wallCommentIn 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.wallComment__inner--pending {
+  opacity: 0.65;
+}
+
+.wallGuestHint--enter {
+  animation: platFadeUp 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .wallComment__inner {
@@ -10383,5 +10449,267 @@
     flex: 1;
     min-height: 0;
     background: linear-gradient(90deg, transparent, rgba(255, 200, 100, 0.35), transparent);
+  }
+}
+
+/* === Диалоги, тосты, глобальные анимации === */
+.platDialogBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: rgba(4, 2, 1, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: uploadBackdropIn 0.22s ease;
+}
+
+.platDialog {
+  position: relative;
+  width: min(100%, 440px);
+  max-height: min(88dvh, 640px);
+  overflow: auto;
+  padding: 24px 22px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 160, 90, 0.22);
+  background: linear-gradient(165deg, rgba(32, 24, 18, 0.98), rgba(10, 8, 6, 0.99));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 24px 64px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(255, 90, 20, 0.1);
+  animation: uploadModalIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  outline: none;
+}
+
+.platDialog--sm {
+  width: min(100%, 400px);
+}
+
+.platDialog__glow {
+  pointer-events: none;
+  position: absolute;
+  top: -35%;
+  left: 50%;
+  width: 110%;
+  height: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(255, 120, 40, 0.22), transparent 68%);
+}
+
+.platDialog__title {
+  margin: 0 0 8px;
+  font-family: "Unbounded", "Outfit", system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff5ef;
+}
+
+.platDialog__desc {
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.platDialog__body {
+  margin-bottom: 18px;
+}
+
+.platDialog__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255, 220, 190, 0.85);
+}
+
+.platDialog__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff5ef;
+  font: inherit;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.platDialog__input:focus {
+  border-color: rgba(255, 140, 60, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.12);
+}
+
+.platDialog__input--area {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.platDialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.platDialog__btn--primary {
+  min-width: 120px;
+}
+
+.platToastHost {
+  position: fixed;
+  left: 50%;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  z-index: 3300;
+  width: min(calc(100vw - 32px), 420px);
+  pointer-events: none;
+}
+
+.platToast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 160, 90, 0.28);
+  background: rgba(18, 14, 12, 0.94);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  animation: platToastIn 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.platToast--error {
+  border-color: rgba(255, 90, 90, 0.4);
+}
+
+.platToast__text {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #fff5ef;
+}
+
+.platToast__close {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@keyframes platContentIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes wallCommentIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes platFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes platToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes platPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.dmMsg--enter {
+  animation: dmMsgIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.dmMsg--pending {
+  opacity: 0.72;
+}
+
+.dmMsg--pending .dmMsg__text {
+  font-style: italic;
+}
+
+.dmSendForm__send:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.dmSendForm__send {
+  transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s;
+}
+
+.btn,
+.wallCommentSubmit,
+.feedPillTabs button {
+  transition:
+    transform 0.15s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn:active:not(:disabled),
+.wallCommentSubmit:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallPost,
+  .wallComment--enter .wallComment__inner,
+  .wallCommentsWrap,
+  .wallActionBtn--pulse .wallActionBtn__icon,
+  .platDialog,
+  .platDialogBackdrop,
+  .platToast,
+  .dmMsg--enter,
+  .wallGuestHint--enter {
+    animation: none !important;
+    transition: none !important;
   }
 }

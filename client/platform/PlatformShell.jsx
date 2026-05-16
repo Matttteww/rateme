@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PlatformAside } from "./PlatformAside.jsx";
 import { PlatformScBackground } from "./PlatformScBackground.jsx";
 import { PlatformAboutModal } from "./PlatformAboutModal.jsx";
+import { PlatformToastHost } from "./PlatformToast.jsx";
 import {
   IconFeed,
   IconMessage,
@@ -182,6 +183,7 @@ export function PlatformShell({
       </aside>
 
       <PlatformAboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <PlatformToastHost />
 
       <main className={`platMain ${section === "messages" ? "platMain--dm" : ""}`}>{children}</main>
 

@@ -3,6 +3,7 @@ import { GuestGateCard } from "./GuestGateCard.jsx";
 import { useAuth } from "./AuthContext.jsx";
 import { api } from "./api.js";
 import { TrackAudioPlayer } from "./TrackAudioPlayer.jsx";
+import { PlatformPromptDialog } from "./PlatformDialog.jsx";
 
 const SWIPE_SKIP_PX = 90;
 const LIKE_SCORE = 8;
@@ -116,6 +117,8 @@ export function RatePage({ onViewProfile, onNeedAuth }) {
   const [exiting, setExiting] = useState(false);
   const [commentOpen, setCommentOpen] = useState(false);
   const [toast, setToast] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportBusy, setReportBusy] = useState(false);
   const touchStart = useRef(null);
 
   const load = useCallback(() => {
@@ -159,17 +162,20 @@ export function RatePage({ onViewProfile, onNeedAuth }) {
     }
   };
 
-  const reportTrack = async () => {
-    const reason = window.prompt("Причина жалобы на трек") || "";
-    if (!reason.trim()) return;
+  const submitReport = async (reason) => {
+    if (!reason.trim() || !item) return;
+    setReportBusy(true);
     try {
       await api("/api/reports", {
         method: "POST",
         body: JSON.stringify({ targetType: "release", targetId: item.id, reason: reason.trim() }),
       });
+      setReportOpen(false);
       setToast("Жалоба отправлена");
     } catch (e) {
       setToast(e.message);
+    } finally {
+      setReportBusy(false);
     }
   };
 
@@ -328,7 +334,7 @@ export function RatePage({ onViewProfile, onNeedAuth }) {
             className="rateAction rateAction--report"
             title="Пожаловаться"
             disabled={exiting}
-            onClick={reportTrack}
+            onClick={() => setReportOpen(true)}
           >
             <span className="rateAction__icon" aria-hidden>
               ⚠
@@ -393,6 +399,18 @@ export function RatePage({ onViewProfile, onNeedAuth }) {
           }}
         />
       )}
+
+      <PlatformPromptDialog
+        open={reportOpen}
+        onClose={() => !reportBusy && setReportOpen(false)}
+        onSubmit={submitReport}
+        title="Пожаловаться на трек"
+        description="Опишите, что не так с этим релизом."
+        label="Причина"
+        placeholder="Спам, нарушение правил…"
+        submitLabel="Отправить"
+        busy={reportBusy}
+      />
     </div>
   );
 }

@@ -135,16 +135,42 @@ export function MessagesPage({ initialConversationId, onConversationOpened, onNe
     if (sending || sendingRef.current || !activeId || (!text.trim() && !files.length)) return;
     sendingRef.current = true;
     setSending(true);
+
+    const body = text.trim();
+    const savedFiles = [...files];
+    const tempId = `tmp-dm-${Date.now()}`;
+    if (body) {
+      appendMessage({
+        id: tempId,
+        body,
+        isMine: true,
+        createdAt: Date.now(),
+        sender: user,
+        attachments: [],
+        _pending: true,
+        _animate: true,
+      });
+    }
+    setText("");
+    setFiles([]);
+
     const fd = new FormData();
-    if (text.trim()) fd.append("body", text.trim());
-    for (const f of files) fd.append("files", f);
+    if (body) fd.append("body", body);
+    for (const f of savedFiles) fd.append("files", f);
     try {
       const j = await api(`/api/dm/conversations/${activeId}/messages`, { method: "POST", body: fd });
-      appendMessage(j.message);
-      setText("");
-      setFiles([]);
+      if (body) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? { ...j.message, _animate: true } : m))
+        );
+      } else {
+        appendMessage({ ...j.message, _animate: true });
+      }
       loadConversations();
     } catch (ex) {
+      if (body) setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      setText(body);
+      setFiles(savedFiles);
       setErr(ex.message);
     } finally {
       sendingRef.current = false;
@@ -333,7 +359,17 @@ export function MessagesPage({ initialConversationId, onConversationOpened, onNe
                 <p className="dmMessagesEmpty muted">Напишите первое сообщение</p>
               )}
               {messages.map((m) => (
-                <div key={m.id} className={`dmMsg ${m.isMine ? "dmMsg--mine" : "dmMsg--their"}`}>
+                <div
+                  key={m.id}
+                  className={[
+                    "dmMsg",
+                    m.isMine ? "dmMsg--mine" : "dmMsg--their",
+                    m._animate ? "dmMsg--enter" : "",
+                    m._pending ? "dmMsg--pending" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
                   {!m.isMine && (
                     <span className="dmMsgAuthor">{m.sender?.displayName || m.sender?.username}</span>
                   )}

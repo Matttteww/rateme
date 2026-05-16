@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "./AuthContext.jsx";
 import { api } from "./api.js";
 import { GuestGateCard } from "./GuestGateCard.jsx";
+import { PlatformDialog, PlatformPromptDialog } from "./PlatformDialog.jsx";
+import { showPlatformToast } from "./PlatformToast.jsx";
 
 const SMALL_MEDIA_PX = 320;
 
@@ -83,62 +85,68 @@ function formatViews(n) {
 
 function CommentNode({ node, user, replyTo, setReplyTo, onReplySent, postId, onViewProfile }) {
   const [replyText, setReplyText] = useState("");
+  const [replySending, setReplySending] = useState(false);
   const isReplying = replyTo === node.id;
 
   const submitReply = async (e) => {
     e.preventDefault();
-    if (!replyText.trim() || !user) return;
-    const j = await api(`/api/wall/posts/${postId}/comments`, {
-      method: "POST",
-      body: JSON.stringify({ body: replyText.trim(), parentId: node.id }),
-    });
-    setReplyText("");
-    setReplyTo(null);
-    onReplySent(j);
+    if (!replyText.trim() || !user || replySending) return;
+    setReplySending(true);
+    try {
+      const j = await api(`/api/wall/posts/${postId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ body: replyText.trim(), parentId: node.id }),
+      });
+      setReplyText("");
+      setReplyTo(null);
+      onReplySent(j);
+    } finally {
+      setReplySending(false);
+    }
   };
 
   return (
-    <li className={`wallComment ${node.parentId ? "wallComment--reply" : ""}`}>
-      <div className="wallComment__inner">
+    <li className={`wallComment ${node.parentId ? "wallComment--reply" : ""} ${node._animate ? "wallComment--enter" : ""}`}>
+      <div className={`wallComment__inner${node._pending ? " wallComment__inner--pending" : ""}`}>
         <div className="wallComment__head">
           <WallAuthor author={node.author} onViewProfile={onViewProfile} variant="comment" />
           <time className="wallComment__time">{formatPostDate(node.createdAt)}</time>
         </div>
         <p className="wallComment__text">{node.body}</p>
-      {user && (
-        <button type="button" className="wallReplyBtn" onClick={() => setReplyTo(isReplying ? null : node.id)}>
-          Ответить
-        </button>
-      )}
-      {isReplying && user && (
-        <form className="wallCommentForm wallCommentForm--reply" onSubmit={submitReply}>
-          <input
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            placeholder={`Ответ @${node.author?.username}…`}
-            autoFocus
-          />
-          <button type="submit" className="wallCommentSubmit wallCommentSubmit--sm">
-            Отправить
+        {user && (
+          <button type="button" className="wallReplyBtn" onClick={() => setReplyTo(isReplying ? null : node.id)}>
+            Ответить
           </button>
-        </form>
-      )}
-      {node.replies?.length > 0 && (
-        <ol className="wallCommentList wallCommentList--nested">
-          {node.replies.map((r) => (
-            <CommentNode
-              key={r.id}
-              node={r}
-              user={user}
-              replyTo={replyTo}
-              setReplyTo={setReplyTo}
-              onReplySent={onReplySent}
-              postId={postId}
-              onViewProfile={onViewProfile}
+        )}
+        {isReplying && user && (
+          <form className="wallCommentForm wallCommentForm--reply" onSubmit={submitReply}>
+            <input
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder={`Ответ @${node.author?.username}…`}
+              autoFocus
             />
-          ))}
-        </ol>
-      )}
+            <button type="submit" className="wallCommentSubmit wallCommentSubmit--sm" disabled={replySending}>
+              {replySending ? "…" : "Отправить"}
+            </button>
+          </form>
+        )}
+        {node.replies?.length > 0 && (
+          <ol className="wallCommentList wallCommentList--nested">
+            {node.replies.map((r) => (
+              <CommentNode
+                key={r.id}
+                node={r}
+                user={user}
+                replyTo={replyTo}
+                setReplyTo={setReplyTo}
+                onReplySent={onReplySent}
+                postId={postId}
+                onViewProfile={onViewProfile}
+              />
+            ))}
+          </ol>
+        )}
       </div>
     </li>
   );
@@ -148,21 +156,37 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
   const { user } = useAuth();
   const [post, setPost] = useState(initial);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsMounted, setCommentsMounted] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(false);
   const [guestActionHint, setGuestActionHint] = useState(null);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [commentSending, setCommentSending] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const [likePulse, setLikePulse] = useState(false);
   const [pinBusy, setPinBusy] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editBody, setEditBody] = useState(initial.body || "");
+  const [repostOpen, setRepostOpen] = useState(false);
+  const [repostBusy, setRepostBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportBusy, setReportBusy] = useState(false);
   const articleRef = useRef(null);
   const viewRecorded = useRef(false);
+  const likePulseTimer = useRef(null);
 
   useEffect(() => {
     setPost(initial);
     viewRecorded.current = false;
   }, [initial]);
+
+  useEffect(() => {
+    return () => {
+      if (likePulseTimer.current) clearTimeout(likePulseTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     const el = articleRef.current;
@@ -200,6 +224,12 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
     onUpdate?.(next);
   };
 
+  const pulseLike = () => {
+    setLikePulse(true);
+    if (likePulseTimer.current) clearTimeout(likePulseTimer.current);
+    likePulseTimer.current = setTimeout(() => setLikePulse(false), 420);
+  };
+
   const toggleLike = async () => {
     if (!user) {
       setGuestActionHint("like");
@@ -207,16 +237,21 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
       return;
     }
     setGuestActionHint(null);
-    setBusy(true);
+    const prev = { liked: post.liked, likeCount: post.likeCount };
+    const nextLiked = !post.liked;
+    patch({
+      ...post,
+      liked: nextLiked,
+      likeCount: Math.max(0, (post.likeCount || 0) + (nextLiked ? 1 : -1)),
+    });
+    pulseLike();
     try {
-      const j = post.liked
-        ? await api(`/api/wall/posts/${post.id}/like`, { method: "DELETE" })
-        : await api(`/api/wall/posts/${post.id}/like`, { method: "POST" });
+      const j = nextLiked
+        ? await api(`/api/wall/posts/${post.id}/like`, { method: "POST" })
+        : await api(`/api/wall/posts/${post.id}/like`, { method: "DELETE" });
       patch({ ...post, liked: j.liked, likeCount: j.likeCount });
     } catch {
-      /* */
-    } finally {
-      setBusy(false);
+      patch({ ...post, ...prev });
     }
   };
 
@@ -225,19 +260,32 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
     setComments(j.comments || []);
   };
 
-  const openComments = async () => {
+  const openComments = () => {
     const next = !commentsOpen;
-    setCommentsOpen(next);
-    if (!user && next) {
-      setGuestActionHint("comment");
-      onNeedAuth?.();
-      return;
+    if (next) {
+      setCommentsMounted(true);
+      setCommentsOpen(true);
+      if (!user) {
+        setGuestActionHint("comment");
+        onNeedAuth?.();
+        return;
+      }
+      setGuestActionHint(null);
+      if (comments.length === 0 && !commentsLoading) {
+        setCommentsLoading(true);
+        loadComments()
+          .catch(() => {})
+          .finally(() => setCommentsLoading(false));
+      }
+    } else {
+      setCommentsOpen(false);
     }
-    if (next && comments.length === 0) await loadComments().catch(() => {});
   };
 
   const onCommentAdded = (j) => {
-    if (j.comment) setComments((c) => [...c, j.comment]);
+    if (j.comment) {
+      setComments((c) => [...c, { ...j.comment, _animate: true }]);
+    }
     patch({ ...post, commentCount: j.commentCount ?? post.commentCount + 1 });
   };
 
@@ -250,18 +298,24 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
       });
       patch(j.post);
       setEditing(false);
+      showPlatformToast("Пост обновлён");
     } catch (e) {
-      alert(e?.message || "Не удалось сохранить.");
+      showPlatformToast(e?.message || "Не удалось сохранить.", "error");
     }
   };
 
   const deletePost = async () => {
-    if (!isMine || !window.confirm("Удалить пост?")) return;
+    if (!isMine) return;
+    setDeleteBusy(true);
     try {
       await api(`/api/wall/posts/${post.id}`, { method: "DELETE" });
+      setDeleteOpen(false);
       onRemove?.(post.id);
+      showPlatformToast("Пост удалён");
     } catch (e) {
-      alert(e?.message || "Не удалось удалить пост.");
+      showPlatformToast(e?.message || "Не удалось удалить пост.", "error");
+    } finally {
+      setDeleteBusy(false);
     }
   };
 
@@ -282,34 +336,76 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
     }
   };
 
-  const repost = async () => {
-    const comment = window.prompt("Комментарий к репосту (необязательно)") ?? "";
-    const fd = new FormData();
-    fd.append("repostOfId", post.id);
-    if (comment.trim()) fd.append("repostComment", comment.trim());
-    await api("/api/wall/posts", { method: "POST", body: fd });
-    onReposted?.();
+  const submitRepost = async (comment) => {
+    setRepostBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append("repostOfId", post.id);
+      if (comment) fd.append("repostComment", comment);
+      await api("/api/wall/posts", { method: "POST", body: fd });
+      setRepostOpen(false);
+      onReposted?.();
+      showPlatformToast("Репост опубликован");
+    } catch (e) {
+      showPlatformToast(e?.message || "Не удалось сделать репост.", "error");
+    } finally {
+      setRepostBusy(false);
+    }
   };
 
-  const reportPost = async () => {
-    const reason = window.prompt("Причина жалобы") || "";
-    await api("/api/reports", {
-      method: "POST",
-      body: JSON.stringify({ targetType: "wall_post", targetId: post.id, reason }),
-    });
-    alert("Жалоба отправлена");
+  const submitReport = async (reason) => {
+    if (!reason.trim()) return;
+    setReportBusy(true);
+    try {
+      await api("/api/reports", {
+        method: "POST",
+        body: JSON.stringify({ targetType: "wall_post", targetId: post.id, reason: reason.trim() }),
+      });
+      setReportOpen(false);
+      showPlatformToast("Жалоба отправлена");
+    } catch (e) {
+      showPlatformToast(e?.message || "Не удалось отправить жалобу.", "error");
+    } finally {
+      setReportBusy(false);
+    }
   };
 
   const sendComment = async (e) => {
     e.preventDefault();
-    if (!commentText.trim() || !user) return;
-    const j = await api(`/api/wall/posts/${post.id}/comments`, {
-      method: "POST",
-      body: JSON.stringify({ body: commentText.trim(), parentId: replyTo || undefined }),
-    });
+    if (!commentText.trim() || !user || commentSending) return;
+    const body = commentText.trim();
+    const tempId = `tmp-${Date.now()}`;
+    const optimistic = {
+      id: tempId,
+      body,
+      parentId: replyTo || null,
+      createdAt: Date.now(),
+      author: user,
+      _animate: true,
+      _pending: true,
+    };
+    setComments((c) => [...c, optimistic]);
     setCommentText("");
+    const savedReplyTo = replyTo;
     setReplyTo(null);
-    onCommentAdded(j);
+    setCommentSending(true);
+    try {
+      const j = await api(`/api/wall/posts/${post.id}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ body, parentId: savedReplyTo || undefined }),
+      });
+      setComments((c) =>
+        c.map((x) => (x.id === tempId ? { ...j.comment, _animate: true } : x))
+      );
+      patch({ ...post, commentCount: j.commentCount ?? post.commentCount + 1 });
+    } catch (ex) {
+      setComments((c) => c.filter((x) => x.id !== tempId));
+      setCommentText(body);
+      if (savedReplyTo) setReplyTo(savedReplyTo);
+      showPlatformToast(ex?.message || "Не удалось отправить комментарий.", "error");
+    } finally {
+      setCommentSending(false);
+    }
   };
 
   return (
@@ -378,8 +474,7 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
         </span>
         <button
           type="button"
-          className={`wallActionBtn ${post.liked ? "wallActionBtn--liked" : ""} ${!user ? "wallActionBtn--guest" : ""}`}
-          disabled={busy}
+          className={`wallActionBtn ${post.liked ? "wallActionBtn--liked" : ""} ${likePulse ? "wallActionBtn--pulse" : ""} ${!user ? "wallActionBtn--guest" : ""}`}
           onClick={toggleLike}
           title={!user ? "Войдите, чтобы ставить лайки" : undefined}
         >
@@ -395,13 +490,18 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
           <span>{post.commentCount}</span>
         </button>
         {user && (
-          <button type="button" className="wallActionBtn" onClick={repost}>
+          <button type="button" className="wallActionBtn" onClick={() => setRepostOpen(true)}>
             <span className="wallActionBtn__icon">↗</span>
             <span>Репост</span>
           </button>
         )}
         {user && post.userId !== user.id && (
-          <button type="button" className="wallActionBtn wallActionBtn--icon" onClick={reportPost} title="Пожаловаться">
+          <button
+            type="button"
+            className="wallActionBtn wallActionBtn--icon"
+            onClick={() => setReportOpen(true)}
+            title="Пожаловаться"
+          >
             ⚠
           </button>
         )}
@@ -422,13 +522,13 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
           </button>
         )}
         {isMine && (
-          <button type="button" className="wallActionBtn wallActionBtn--icon" onClick={deletePost} title="Удалить">
+          <button type="button" className="wallActionBtn wallActionBtn--icon" onClick={() => setDeleteOpen(true)} title="Удалить">
             🗑
           </button>
         )}
       </div>
       {guestActionHint && !user && (
-        <div className="wallGuestHint">
+        <div className="wallGuestHint wallGuestHint--enter">
           <GuestGateCard
             compact
             icon={guestActionHint === "comment" ? "message" : "heart"}
@@ -438,53 +538,101 @@ export function FeedPost({ post: initial, onUpdate, onViewProfile, onRemove, onR
           />
         </div>
       )}
-      {commentsOpen && (
-        <div className="wallComments wallComments--open">
-          <ol className="wallCommentList">
-            {tree.map((c) => (
-              <CommentNode
-                key={c.id}
-                node={c}
-                user={user}
-                replyTo={replyTo}
-                setReplyTo={setReplyTo}
-                onReplySent={onCommentAdded}
-                postId={post.id}
-                onViewProfile={onViewProfile}
-              />
-            ))}
-            {tree.length === 0 && <li className="wallCommentEmpty muted">Пока нет комментариев</li>}
-          </ol>
-          {user ? (
-            <form className="wallCommentForm wallCommentForm--main" onSubmit={sendComment}>
-              {replyTo && (
-                <p className="wallReplyHint">
-                  Ответ на комментарий ·{" "}
-                  <button type="button" className="wallReplyCancel" onClick={() => setReplyTo(null)}>
-                    отмена
-                  </button>
-                </p>
+      {commentsMounted && (
+        <div className={`wallCommentsWrap ${commentsOpen ? "wallCommentsWrap--open" : ""}`}>
+          <div className="wallComments">
+            {commentsLoading && (
+              <p className="wallCommentsLoading muted" aria-busy="true">
+                Загрузка комментариев…
+              </p>
+            )}
+            <ol className="wallCommentList">
+              {tree.map((c) => (
+                <CommentNode
+                  key={c.id}
+                  node={c}
+                  user={user}
+                  replyTo={replyTo}
+                  setReplyTo={setReplyTo}
+                  onReplySent={onCommentAdded}
+                  postId={post.id}
+                  onViewProfile={onViewProfile}
+                />
+              ))}
+              {!commentsLoading && tree.length === 0 && (
+                <li className="wallCommentEmpty muted">Пока нет комментариев</li>
               )}
-              <input
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder={replyTo ? "Ваш ответ…" : "Комментарий…"}
+            </ol>
+            {user ? (
+              <form className="wallCommentForm wallCommentForm--main" onSubmit={sendComment}>
+                {replyTo && (
+                  <p className="wallReplyHint">
+                    Ответ на комментарий ·{" "}
+                    <button type="button" className="wallReplyCancel" onClick={() => setReplyTo(null)}>
+                      отмена
+                    </button>
+                  </p>
+                )}
+                <input
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  placeholder={replyTo ? "Ваш ответ…" : "Комментарий…"}
+                  disabled={commentSending}
+                />
+                <button type="submit" className="wallCommentSubmit" disabled={commentSending}>
+                  {commentSending ? "…" : "Отправить"}
+                </button>
+              </form>
+            ) : (
+              <GuestGateCard
+                compact
+                icon="message"
+                title="Комментарии — для своих"
+                subtitle="Войдите, чтобы обсуждать пост."
+                onAction={onNeedAuth}
               />
-              <button type="submit" className="wallCommentSubmit">
-                Отправить
-              </button>
-            </form>
-          ) : (
-            <GuestGateCard
-              compact
-              icon="message"
-              title="Комментарии — для своих"
-              subtitle="Войдите, чтобы обсуждать пост."
-              onAction={onNeedAuth}
-            />
-          )}
+            )}
+          </div>
         </div>
       )}
+
+      <PlatformPromptDialog
+        open={repostOpen}
+        onClose={() => !repostBusy && setRepostOpen(false)}
+        onSubmit={submitRepost}
+        title="Репост"
+        description="Добавьте свой комментарий к чужому посту или оставьте поле пустым."
+        label="Комментарий (необязательно)"
+        placeholder="Ваши мысли…"
+        submitLabel="Опубликовать репост"
+        optional
+        multiline
+        busy={repostBusy}
+      />
+
+      <PlatformDialog
+        open={deleteOpen}
+        onClose={() => !deleteBusy && setDeleteOpen(false)}
+        title="Удалить пост?"
+        description="Действие нельзя отменить."
+        primaryLabel="Удалить"
+        secondaryLabel="Отмена"
+        onPrimary={deletePost}
+        busy={deleteBusy}
+        size="sm"
+      />
+
+      <PlatformPromptDialog
+        open={reportOpen}
+        onClose={() => !reportBusy && setReportOpen(false)}
+        onSubmit={submitReport}
+        title="Пожаловаться"
+        description="Опишите, что не так с этим постом."
+        label="Причина"
+        placeholder="Спам, оскорбления…"
+        submitLabel="Отправить"
+        busy={reportBusy}
+      />
     </article>
   );
 }
