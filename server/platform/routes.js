@@ -2205,10 +2205,12 @@ function mountPlatformRoutes(app) {
       const members = db.prepare("SELECT user_id FROM dm_members WHERE conversation_id = ?").all(convId);
       const row = db.prepare("SELECT * FROM dm_messages WHERE id = ?").get(msgId);
       for (const m of members) {
-        const mapped = mapDmMessage(db, row, m.user_id);
-        pushToUser(m.user_id, { type: "dm_message", conversationId: convId, message: mapped });
         const convSummary = mapDmConversation(db, convId, m.user_id);
         if (convSummary) pushToUser(m.user_id, { type: "dm_conversation", conversation: convSummary });
+        /* Отправителю сообщение уже в ответе POST — без повторного push (иначе дубль в UI). */
+        if (m.user_id === req.user.id) continue;
+        const mapped = mapDmMessage(db, row, m.user_id);
+        pushToUser(m.user_id, { type: "dm_message", conversationId: convId, message: mapped });
         if (m.user_id !== req.user.id) {
           createNotification(m.user_id, "dm_message", {
             conversationId: convId,

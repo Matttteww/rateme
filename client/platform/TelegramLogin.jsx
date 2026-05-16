@@ -49,7 +49,10 @@ export function TelegramLogin({ onSuccess }) {
     setLoadErr("");
 
     cleanupRef.current?.();
+    const oauthOrigin = cfg.telegramOAuthOrigin || window.location.origin;
+
     cleanupRef.current = openTelegramOAuth(cfg.telegramBotId, {
+      origin: oauthOrigin,
       onSuccess: async (payload) => {
         try {
           await completeTelegramAuth(payload);
@@ -74,7 +77,16 @@ export function TelegramLogin({ onSuccess }) {
         <span>{busy ? "Ожидание Telegram…" : "Войти через Telegram"}</span>
       </button>
       <p className="muted tgLoginDomainHint">
-        Откроется окно Telegram. Домен в BotFather: <strong>{cfg.telegramDomainHint || "127.0.0.1"}</strong>
+        В @BotFather: <strong>/setdomain</strong> → укажите только{" "}
+        <strong>{cfg.telegramDomainHint || "127.0.0.1"}</strong> (без http и без :3847).
+        <br />
+        Сайт сейчас: <code>{window.location.origin}</code>
+        {cfg.telegramOAuthOrigin && cfg.telegramOAuthOrigin !== window.location.origin ? (
+          <>
+            <br />
+            OAuth origin с сервера: <code>{cfg.telegramOAuthOrigin}</code>
+          </>
+        ) : null}
       </p>
     </div>
   );

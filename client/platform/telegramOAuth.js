@@ -4,10 +4,10 @@ import {
   parseTelegramHash,
 } from "./telegramCallback.js";
 
-function buildOAuthUrl(botId) {
+function buildOAuthUrl(botId, origin) {
   const q = new URLSearchParams({
     bot_id: String(botId),
-    origin: window.location.origin,
+    origin: origin || window.location.origin,
     request_access: "write",
   });
   q.set("_", String(Date.now()));
@@ -27,9 +27,23 @@ function parsePostMessageData(data) {
   }
 }
 
-/** Вход через popup: повторные входы стабильнее, чем полный редирект вкладки. */
-export function openTelegramOAuth(botId, { onSuccess, onError }) {
-  const url = buildOAuthUrl(botId);
+function preferRedirectFlow() {
+  try {
+    return window.matchMedia("(max-width: 900px)").matches;
+  } catch {
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "");
+  }
+}
+
+/** На телефоне — редирект вкладки (popup часто ломается); на ПК — popup. */
+export function openTelegramOAuth(botId, { onSuccess, onError, origin }) {
+  const url = buildOAuthUrl(botId, origin);
+
+  if (preferRedirectFlow()) {
+    window.location.assign(url);
+    return () => {};
+  }
+
   const popup = window.open(
     url,
     "telegram_oauth",

@@ -45,15 +45,49 @@ async function ensureTelegramBotInfo() {
   return { enabled: false, username: null, error: initError };
 }
 
+function resolveTelegramDomainHint() {
+  const raw = (process.env.TELEGRAM_PUBLIC_DOMAIN || process.env.PUBLIC_HOST || "").trim();
+  if (raw) {
+    try {
+      const u = raw.includes("://") ? new URL(raw) : new URL(`http://${raw}`);
+      return u.hostname;
+    } catch {
+      return raw.replace(/^https?:\/\//, "").split("/")[0].split(":")[0];
+    }
+  }
+  const oauth = (process.env.TELEGRAM_OAUTH_ORIGIN || process.env.PUBLIC_URL || "").trim();
+  if (oauth) {
+    try {
+      const u = new URL(oauth.includes("://") ? oauth : `http://${oauth}`);
+      return u.hostname;
+    } catch {
+      /* */
+    }
+  }
+  return "127.0.0.1";
+}
+
+function resolveTelegramOAuthOrigin() {
+  const explicit = (process.env.TELEGRAM_OAUTH_ORIGIN || process.env.PUBLIC_URL || "").trim();
+  if (!explicit) return null;
+  try {
+    const u = new URL(explicit.includes("://") ? explicit : `http://${explicit}`);
+    return u.origin;
+  } catch {
+    return explicit.replace(/\/$/, "");
+  }
+}
+
 function getTelegramPublicConfig() {
-  const domain =
-    (process.env.TELEGRAM_PUBLIC_DOMAIN || process.env.PUBLIC_HOST || "").trim() || "127.0.0.1";
+  const domainHint = resolveTelegramDomainHint();
+  const oauthOrigin = resolveTelegramOAuthOrigin();
   return {
     telegramLoginEnabled: Boolean(TOKEN && username && botId),
     telegramBotUsername: username || null,
     telegramBotId: botId || null,
     telegramLoginError: initError,
-    telegramDomainHint: domain,
+    telegramDomainHint: domainHint,
+    telegramOAuthOrigin: oauthOrigin,
   };
 }
 

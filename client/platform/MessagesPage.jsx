@@ -29,8 +29,15 @@ export function MessagesPage({ initialConversationId, onConversationOpened, onNe
   const [newUser, setNewUser] = useState("");
   const [searchHits, setSearchHits] = useState([]);
   const [err, setErr] = useState("");
+  const [sending, setSending] = useState(false);
   const bottomRef = useRef(null);
   const dmFileRef = useRef(null);
+  const sendingRef = useRef(false);
+
+  const appendMessage = useCallback((msg) => {
+    if (!msg?.id) return;
+    setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia(DM_MOBILE_MQ);
@@ -79,13 +86,13 @@ export function MessagesPage({ initialConversationId, onConversationOpened, onNe
   const onWs = useCallback(
     (msg) => {
       if (msg.type === "dm_message" && msg.conversationId === activeId && msg.message) {
-        setMessages((prev) => (prev.some((m) => m.id === msg.message.id) ? prev : [...prev, msg.message]));
+        appendMessage(msg.message);
         loadConversations();
       } else if (msg.type === "dm_conversation") {
         loadConversations();
       }
     },
-    [activeId, loadConversations]
+    [activeId, loadConversations, appendMessage]
   );
   usePlatformWs(onWs);
 
@@ -125,18 +132,23 @@ export function MessagesPage({ initialConversationId, onConversationOpened, onNe
 
   const send = async (e) => {
     e.preventDefault();
-    if (!activeId || (!text.trim() && !files.length)) return;
+    if (sending || sendingRef.current || !activeId || (!text.trim() && !files.length)) return;
+    sendingRef.current = true;
+    setSending(true);
     const fd = new FormData();
     if (text.trim()) fd.append("body", text.trim());
     for (const f of files) fd.append("files", f);
     try {
       const j = await api(`/api/dm/conversations/${activeId}/messages`, { method: "POST", body: fd });
-      setMessages((m) => [...m, j.message]);
+      appendMessage(j.message);
       setText("");
       setFiles([]);
       loadConversations();
     } catch (ex) {
       setErr(ex.message);
+    } finally {
+      sendingRef.current = false;
+      setSending(false);
     }
   };
 
@@ -367,8 +379,8 @@ export function MessagesPage({ initialConversationId, onConversationOpened, onNe
                   className="dmSendForm__file"
                   onChange={(e) => setFiles(Array.from(e.target.files || []))}
                 />
-                <button type="submit" className="dmSendForm__send">
-                  Отправить
+                <button type="submit" className="dmSendForm__send" disabled={sending}>
+                  {sending ? "…" : "Отправить"}
                 </button>
               </div>
             </form>
